@@ -1,0 +1,56 @@
+<main>
+  <header>
+    <p class="surtitre">Exemple de hackathon</p>
+    <h1>Annonces IA</h1>
+    <p>Extraire les compétences mentionnées dans une offre d’emploi.</p>
+  </header>
+
+  <section class="carte" aria-labelledby="nouvelle">
+    <h2 id="nouvelle">Nouvelle annonce</h2>
+    <form (ngSubmit)="analyser()">
+      <label for="texte">Texte de l’annonce</label>
+      <textarea id="texte" name="texte" rows="5" [(ngModel)]="texte"
+        [maxlength]="max" [readOnly]="envoi()" aria-describedby="compteur"
+        placeholder="Colle ici le texte de l’offre."></textarea>
+      <p id="compteur" class="secondaire">{{ texte.length }} / {{ max }} caractères</p>
+      <div class="actions">
+        <button type="submit" [disabled]="!texte.trim() || envoi() || chargement()">
+          {{ envoi() ? 'Analyse en cours…' : 'Analyser et enregistrer' }}
+        </button>
+        <button type="button" class="lien" [disabled]="envoi()" (click)="texte = exemples">
+          Utiliser un exemple
+        </button>
+      </div>
+    </form>
+    @if (erreurEnvoi()) { <p class="erreur" role="alert">{{ erreurEnvoi() }}</p> }
+    @if (confirmation()) { <p class="confirmation" role="status">{{ confirmation() }}</p> }
+  </section>
+
+  <section aria-labelledby="historique">
+    <h2 id="historique">Annonces enregistrées</h2>
+    @if (erreurListe()) {
+      <p class="erreur" role="alert">{{ erreurListe() }}</p>
+      <button type="button" class="lien" [disabled]="envoi()" (click)="charger()">Réessayer</button>
+    }
+    @if (chargement()) {
+      <p role="status">Chargement…</p>
+    } @else if (!erreurListe() && annonces().length === 0) {
+      <p class="secondaire">Aucune annonce pour le moment.</p>
+    }
+    @for (annonce of annonces(); track annonce.id) {
+      <article class="carte annonce">
+        <h3>Annonce nº {{ annonce.id }}</h3>
+        <p class="texte">{{ annonce.texte }}</p>
+        @if (annonce.competences.length) {
+          <ul class="competences" aria-label="Compétences extraites">
+            @for (competence of annonce.competences; track competence) {
+              <li>{{ competence }}</li>
+            }
+          </ul>
+        } @else {
+          <p class="secondaire">Aucune compétence explicite détectée.</p>
+        }
+      </article>
+    }
+  </section>
+</main>

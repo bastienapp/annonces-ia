@@ -1,0 +1,36 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: annonces
+      POSTGRES_USER: annonces
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-annonces-dev}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U annonces -d annonces"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  backend:
+    build: ./backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/annonces
+      SPRING_DATASOURCE_USERNAME: annonces
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-annonces-dev}
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:?Renseigne N8N_WEBHOOK_URL dans .env}
+      N8N_WEBHOOK_SECRET: ${N8N_WEBHOOK_SECRET:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${APP_PORT:-8080}:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

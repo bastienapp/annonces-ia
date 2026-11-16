@@ -1,0 +1,9 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+
+n8n:
+  webhook-url: ${N8N_WEBHOOK_URL:}
+  webhook-secret: ${N8N_WEBHOOK_SECRET:}
